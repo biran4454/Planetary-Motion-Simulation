@@ -10,10 +10,10 @@ public class Particle{
   void drawParticle(){
     stroke(255);
     strokeWeight(10);
-    point(p.x, p.y);
+    point(stp(p.x), p.y);
     if(ID == 0){
-      float otherX = particles.get(1).p.x; // If p.x =  1 then f.x =  0.5 then v.x =  1.5 then p.x =  2.5
-      force = 1 / (p.x - otherX); //     else If p.x = -1 then f.x = -0.5 then v.x = -1.5 then p.x = -1.5  Oh the wonders of fixed-width fonts!
+      float otherX = particles.get(1).p.x; // IMPORTANT: x values are with centre 0. stp() converts back to Processing format (left side of screen 0)
+      force = 1 / (p.x - otherX);
     } else if(ID == 1){
       float otherX = particles.get(0).p.x;
       force = 1 / (p.x - otherX);
@@ -33,5 +33,8 @@ public class Particle{
   }
   void setID(int id){
     ID = id;
+  }
+  float stp(float x){
+    return(x + width / 2);
   }
 }
