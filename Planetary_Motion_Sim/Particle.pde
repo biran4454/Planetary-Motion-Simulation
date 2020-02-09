@@ -1,8 +1,11 @@
-public class Particle{
+public class Particle{ //<>//
   Particle(int x, int y, float vx, float vy, float mass, float radius){
     p = new PVector(x, y);
+    pubP = p;
     v = new PVector(vx, vy);
+    pubV = v;
     acc = new PVector(0, 0);
+    pubAcc = acc;
     this.mass = mass;
     this.radius = radius;
   }/*
@@ -18,77 +21,72 @@ public class Particle{
     p = new PVector(x, y);
     v = new PVector(0, 0);
     a = new PVector(0, 0);
-    mass = 100; //<>//
+    mass = 100;
     radius = 10;
     gAcc = ((6.6726e-11) * mass) / (radius * radius);
   }*/
   public int ID;
   private PVector p, v, acc;
   public float mass, radius;
-  public float gAcc;
+  private float gAcc;
+  
+  public PVector pubP, pubV, pubAcc;
   void drawParticle(){
-    stroke(255);
-    strokeWeight(radius * 2);
+    if(ID == 0){
+      stroke(255, 0, 0);
+      strokeWeight(10);
+    } else {
+      stroke(0, 255, 0);
+      strokeWeight(13);
+    }
+    //strokeWeight(radius * 2);
     point(stp(p.x), p.y); // IMPORTANT: x values are with centre 0. stp() converts back to Processing format (left side of screen 0)
     
-    float distance, otherMass;
+    float distance, otherMass, otherX;
+    int direction; // If positive, pulls to the right, if negative, pulls to the left
     
     if(ID == 0){
       otherMass = particles.get(1).mass;
-      distance = p.x - particles.get(1).p.x;
-    } else if(ID == 1){
+      otherX = particles.get(1).pubP.x;
+      distance = abs(p.x - otherX);
+      if(p.x > otherX){
+        direction = -1;
+      } else if(p.x < otherX){
+        direction = 1;
+      } else {
+        direction = 0;
+      }
+      
+    } else {
       otherMass = particles.get(0).mass;
-      distance = p.x - particles.get(0).p.x;
-    } else {otherMass = 0; distance = 0;}
+      otherX = particles.get(0).pubP.x;
+      distance = abs(p.x - otherX);
+      if(p.x > otherX){
+        direction = -1;
+      } else if(p.x < otherX){
+        direction = 1;
+      } else {
+        direction = 0;
+      }
+      
+    }
     
     gAcc = (6.6726e-11 * mass * otherMass) / (distance * distance);
-    
-    
-    /*if(ID == 0){
-      otherGAcc = particles.get(1).gAcc;
-    } else if(ID == 1){
-      otherGAcc = particles.get(0).gAcc;
-    } else {otherGAcc = 0;}
-    acc = otherGAcc + gAcc;*/
-    
-    acc.set(gAcc / mass, 0);
-    
-    /*
-    if(ID == 0){
-      otherX = particles.get(1).p.x; 
-      force = 1 / (p.x - otherX);
-    } else if(ID == 1){
-      otherX = particles.get(0).p.x;
-      force = 1 / (p.x - otherX);
-    } else {force = 0;}
-    */
-    
-    v.add(acc.div(60)); 
-    /*
-    for(int i = 0; i < particles.size(); i++){
-      if(i != ID){
-        particle = particles.get(i);
-        particle.
-      }
+    if(direction != 0){
+      acc.set((gAcc / mass) * direction, 0);
+      v.add(acc.div(60)); 
     }
-    */
-    
-    p.add(v);
+    p.add(v);    
+  }
+  void publishVariables(){
+    pubP = p;
+    pubV = v;
+    pubAcc = acc;
   }
   void setID(int id){
     ID = id;
   }
   float stp(float x){
     return(x + width / 2);
-  }
-  float getGAcc(float dist){
-    float otherMass;
-    if(ID == 0){
-      otherMass = particles.get(1).mass;
-    } else if(ID == 1){
-      otherMass = particles.get(0).mass;
-    } else {otherMass = 0;}
-    
-    return((6.6726e-11 * mass* otherMass) / (dist * dist));
   }
 }
