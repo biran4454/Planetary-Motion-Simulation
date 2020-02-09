@@ -28,7 +28,7 @@ public class Particle{
   public float gAcc;
   void drawParticle(){
     stroke(255);
-    strokeWeight(10);
+    strokeWeight(radius * 2);
     point(stp(p.x), p.y); // IMPORTANT: x values are with centre 0. stp() converts back to Processing format (left side of screen 0)
     
     float distance, otherMass;
@@ -40,7 +40,8 @@ public class Particle{
       otherMass = particles.get(0).mass;
       distance = p.x - particles.get(0).p.x;
     } else {otherMass = 0; distance = 0;}
-    gAcc = (6.6726e-11  * otherMass) / (distance * distance);
+    
+    gAcc = (6.6726e-11 * mass * otherMass) / (distance * distance);
     
     
     /*if(ID == 0){
@@ -50,7 +51,7 @@ public class Particle{
     } else {otherGAcc = 0;}
     acc = otherGAcc + gAcc;*/
     
-    acc.set(gAcc, 0);
+    acc.set(gAcc / mass, 0);
     
     /*
     if(ID == 0){
@@ -62,7 +63,7 @@ public class Particle{
     } else {force = 0;}
     */
     
-    v.add(acc); 
+    v.add(acc.div(60)); 
     /*
     for(int i = 0; i < particles.size(); i++){
       if(i != ID){
