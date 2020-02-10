@@ -32,49 +32,47 @@ public class Particle{ //<>//
   
   public PVector pubP, pubV, pubAcc;
   void drawParticle(){
-    if(ID == 0){
+    ////////  DRAWING  \\\\\\\\
+    if(ID == 0){ // Gives them different colours
       stroke(255, 0, 0);
-      strokeWeight(10);
     } else {
       stroke(0, 255, 0);
-      strokeWeight(13);
     }
-    //strokeWeight(radius * 2);
+    strokeWeight(radius * 2);
     point(stp(p.x), p.y); // IMPORTANT: x values are with centre 0. stp() converts back to Processing format (left side of screen 0)
     
-    float distance, otherMass, otherX;
+    ////////  CALCULATIONS  \\\\\\\\
+    
+    float distance, otherMass, otherX, otherRadius;
     int direction; // If positive, pulls to the right, if negative, pulls to the left
     
+    ///  Get other particles properties  ///
     if(ID == 0){
-      otherMass = particles.get(1).mass;
-      otherX = particles.get(1).pubP.x;
-      distance = abs(p.x - otherX);
-      if(p.x > otherX){
-        direction = -1;
-      } else if(p.x < otherX){
-        direction = 1;
-      } else {
-        direction = 0;
-      }
-      
+      otherMass = massB;
+      otherX = xPosB;
+      otherRadius = radiusB;
+      distance = globDistance;
     } else {
-      otherMass = particles.get(0).mass;
-      otherX = particles.get(0).pubP.x;
-      distance = abs(p.x - otherX);
-      if(p.x > otherX){
-        direction = -1;
-      } else if(p.x < otherX){
-        direction = 1;
-      } else {
-        direction = 0;
-      }
-      
+      otherMass = massA;
+      otherX = xPosA;
+      otherRadius = radiusA;
+      distance = globDistance;
     }
-    
-    gAcc = (6.6726e-11 * mass * otherMass) / (distance * distance);
-    if(direction != 0){
-      acc.set((gAcc / mass) * direction, 0);
-      v.add(acc.div(60)); 
+    ///  Get direction (-1 = L, 1 = R) to other particle  ///
+    if(p.x > otherX){
+      direction = -1;
+    } else if(p.x < otherX){
+      direction = 1;
+    } else {
+      direction = 0;
+    }
+    ///  Do physics!  ///
+    if(globDistance > radius + otherRadius){ // If they aren't touching
+      gAcc = (6.6726e-11 * mass * otherMass) / (distance * distance); // Get force between them
+      gAcc = (gAcc / mass) * direction;
+      
+      acc.set(gAcc, 0); // Update accelleration
+      v.add(acc.div(60)); // Update velocity
     }
     p.add(v);    
   }
