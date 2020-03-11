@@ -1,4 +1,4 @@
-public class Particle{ //<>//
+public class Particle{
   Particle(int x, int y, float vx, float vy, float mass, float radius){
     p = new PVector(x, y);
     pubP = p;
@@ -28,7 +28,7 @@ public class Particle{ //<>//
   public int ID;
   private PVector p, v, acc;
   public float mass, radius;
-  private float gAcc;
+  private float gAccX, gAccY;
   
   public PVector pubP, pubV, pubAcc;
   void drawParticle(){
@@ -39,42 +39,65 @@ public class Particle{ //<>//
       stroke(0, 255, 0);
     }
     strokeWeight(radius * 2);
-    point(stp(p.x), p.y); // IMPORTANT: x values are with centre 0. stp() converts back to Processing format (left side of screen 0)
+    point(stpX(p.x), stpY(p.y)); // IMPORTANT: x values are with centre 0. stp() converts back to Processing format (left side of screen 0)
     
     ////////  CALCULATIONS  \\\\\\\\
     
-    float distance, otherMass, otherX, otherRadius;
-    int direction; // If positive, pulls to the right, if negative, pulls to the left
+    float distance, otherMass, otherX, otherY, otherRadius, xDist, yDist;
+    int xDirection, yDirection; // If positive, pulls to the right, if negative, pulls to the left
     
     ///  Get other particles properties  ///
     if(ID == 0){
       otherMass = massB;
       otherX = xPosB;
+      otherY = yPosB;
       otherRadius = radiusB;
       distance = globDistance;
+      xDist = xDistance;
+      yDist = yDistance;
     } else {
       otherMass = massA;
       otherX = xPosA;
+      otherY = yPosA;
       otherRadius = radiusA;
       distance = globDistance;
+      xDist = xDistance;
+      yDist = yDistance;
     }
     ///  Get direction (-1 = L, 1 = R) to other particle  ///
     if(p.x > otherX){
-      direction = -1;
+      xDirection = -1;
     } else if(p.x < otherX){
-      direction = 1;
+      xDirection = 1;
     } else {
-      direction = 0;
+      xDirection = 0;
+    }
+    if(p.y > otherY){
+      yDirection = -1;
+    } else if(p.y < otherY){
+      yDirection = 1;
+    } else {
+      yDirection = 0;
     }
     ///  Do physics!  ///
-    if(globDistance > radius + otherRadius){ // If they aren't touching
-      gAcc = (6.6726e-11 * mass * otherMass) / (distance * distance); // Get force between them
-      gAcc = (gAcc / mass) * direction;
+    if(xDist > radius + otherRadius){ // If they aren't touching
+      gAccX = (6.6726e-11 * mass * otherMass) / (distance * distance); // Get force between them  // SHOULD THIS BE xDist * yDist OR distance * distance ?
+      gAccX = (gAccX / mass) * xDirection;
       
-      acc.set(gAcc, 0); // Update accelleration
-      v.add(acc.div(60)); // Update velocity
+      acc.set(gAccX, acc.y); // Update accelleration
+      //v.add(acc.div(60)); // Update velocity
     }
-    p.add(v);    
+    if(yDist > radius + otherRadius){
+      gAccY = (6.6726e-11 * mass * otherMass) / (distance * distance); // Get force between them  // SHOULD THIS BE xDist * yDist OR distance * distance ?
+      gAccY = (gAccY / mass) * yDirection;
+      
+      acc.set(acc.x, gAccY); // Update accelleration
+      //v.add(acc.div(60)); // Update velocity  // SHOULD THERE BE TWO UPDATES OF VELOCITY IF ABOVE UPDATE RUN?
+    }
+    if(xDist > radius + otherRadius || yDist > radius + otherRadius){
+      v.add(acc.div(60));
+    }
+    p.add(v); // TODO: x time              // ALL OF THIS PRODUCES GOOD RESULTS WHEN X1 = X2 OR Y1 = Y2 OR X1 = Y2 ETC., BUT NOT WHEN THEY'RE DIFFERENT. WHY?  //<>//
   }
   void publishVariables(){
     pubP = p;
@@ -84,7 +107,10 @@ public class Particle{ //<>//
   void setID(int id){
     ID = id;
   }
-  float stp(float x){
+  float stpX(float x){
     return(x + width / 2);
+  }
+  float stpY(float y){
+    return(height / 2 - y);
   }
 }

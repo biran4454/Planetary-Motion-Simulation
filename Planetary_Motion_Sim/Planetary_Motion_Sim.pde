@@ -1,11 +1,11 @@
 ArrayList<Particle> particles = new ArrayList<Particle>();
-float globDistance;
-float xPosA, xPosB, massA, massB, radiusA, radiusB;
+float globDistance, xDistance, yDistance;
+float xPosA, xPosB, yPosA, yPosB, massA, massB, radiusA, radiusB;
 void setup(){
-  size(1000, 800, P3D);
+  size(1000, 800);
   background(30);
-  particles.add(new Particle(-200, height / 2, 0, 0, 5.98e+13, 50));
-  particles.add(new Particle( 200, height / 2, 0, 0, 5.98e+12, 5));
+  particles.add(new Particle( 50, 0, 0, 0, 5.98e+12, 5));
+  particles.add(new Particle( 0, 50, 0, 0, 5.98e+12, 5));
   for(int i = 0; i < particles.size(); i++){
     particles.get(i).setID(i);
   }
@@ -14,13 +14,19 @@ void setup(){
 
 void draw(){
   background(30);
-  globDistance = abs(particles.get(0).pubP.x - particles.get(1).pubP.x);
+  
   xPosA = particles.get(0).pubP.x;
   xPosB = particles.get(1).pubP.x;
+  yPosA = particles.get(0).pubP.y;
+  yPosB = particles.get(1).pubP.y;
   massA = particles.get(0).mass;
   massB = particles.get(1).mass;
   radiusA = particles.get(0).radius;
   radiusB = particles.get(1).radius;
+  
+  globDistance = sqrt(pow(abs(xPosA - xPosB), 2) + pow(abs(yPosA - yPosB), 2));
+  xDistance = abs(xPosA - xPosB);
+  yDistance = abs(yPosA - yPosB);
   
   for(Particle particle : particles){
     particle.drawParticle();
