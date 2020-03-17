@@ -28,7 +28,7 @@ public class Particle{
   public int ID;
   private PVector p, v, acc;
   public float mass, radius;
-  private float gAccX, gAccY;
+  private double gAccX, gAccY;
   
   public PVector pubP, pubV, pubAcc;
   void drawParticle(){
@@ -42,8 +42,8 @@ public class Particle{
     point(stpX(p.x), stpY(p.y)); // IMPORTANT: x values are with centre 0. stp() converts back to Processing format (left side of screen 0)
     
     ////////  CALCULATIONS  \\\\\\\\
-    
-    float distance, otherMass, otherX, otherY, otherRadius, xDist, yDist;
+    float distance, otherMass, otherRadius;
+    float otherX, otherY, xDist, yDist;
     int xDirection, yDirection; // If positive, pulls to the right, if negative, pulls to the left
     
     ///  Get other particles properties  ///
@@ -80,24 +80,38 @@ public class Particle{
       yDirection = 0;
     }
     ///  Do physics!  ///
-    if(xDist > radius + otherRadius){ // If they aren't touching
-      gAccX = (6.6726e-11 * mass * otherMass) / (distance * distance); // Get force between them  // SHOULD THIS BE xDist * yDist OR distance * distance ?
-      gAccX = (gAccX / mass) * xDirection;
+    double gAcc = ((6.6726e-11 * mass * otherMass) / (distance * distance)) / mass; // Get force between them
+    float setX, setY;
+    setX = acc.x;
+    setY = acc.y;
+    if(abs(xDist) > radius + otherRadius){ // Avoid / by 0
+      gAccX = gAcc * xDirection;
+      gAccX = gAccX * cos(atan(yDist / xDist));
+      setX = (float)gAccX;
       
-      acc.set(gAccX, acc.y); // Update accelleration
-      //v.add(acc.div(60)); // Update velocity
+      //acc.set(gAccX, acc.y); // Update accelleration
     }
-    if(yDist > radius + otherRadius){
-      gAccY = (6.6726e-11 * mass * otherMass) / (distance * distance); // Get force between them  // SHOULD THIS BE xDist * yDist OR distance * distance ?
-      gAccY = (gAccY / mass) * yDirection;
-      
-      acc.set(acc.x, gAccY); // Update accelleration
-      //v.add(acc.div(60)); // Update velocity  // SHOULD THERE BE TWO UPDATES OF VELOCITY IF ABOVE UPDATE RUN?
+    if(abs(yDist) > radius + otherRadius){
+      gAccY = gAcc * yDirection;
+      gAccY = gAccY * sin(atan(yDist / xDist));
+      setY = (float)gAccY;
+      //acc.set(acc.x, gAccY); // Update accelleration
     }
+    acc.set(0, 0);
+    acc.set(setX, setY);
+    //acc.(setY / setX);
     if(xDist > radius + otherRadius || yDist > radius + otherRadius){
       v.add(acc.div(60));
     }
-    p.add(v); // TODO: x time              // ALL OF THIS PRODUCES GOOD RESULTS WHEN X1 = X2 OR Y1 = Y2 OR X1 = Y2 ETC., BUT NOT WHEN THEY'RE DIFFERENT. WHY?  //<>//
+    p.add(v); // TODO: x time              // ALL OF THIS PRODUCES GOOD RESULTS WHEN X1 = X2 OR Y1 = Y2 OR X1 = Y2 ETC., BUT NOT WHEN THEY'RE DIFFERENT. WHY? 
+    //if(ID == 0){
+      strokeWeight(4);
+      stroke(255);
+      line(stpX(p.x), stpY(p.y), stpX(p.x + acc.x * 1500), stpY(p.y + acc.y * 1500));
+      stroke(255, 255, 0);
+      line(stpX(p.x), stpY(p.y), stpX(p.x + v.x * 100), stpY(p.y + v.y * 100));
+      //println(acc.x, acc.y);
+    //}  //<>//
   }
   void publishVariables(){
     pubP = p;
