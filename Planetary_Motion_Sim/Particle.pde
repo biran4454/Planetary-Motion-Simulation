@@ -84,7 +84,7 @@ public class Particle{
     float setX, setY;
     setX = acc.x;
     setY = acc.y;
-    if(abs(xDist) > radius + otherRadius){ // Avoid / by 0
+    /*if(abs(xDist) > radius + otherRadius){ // Avoid / by 0
       gAccX = gAcc * xDirection;
       gAccX = gAccX * cos(atan(yDist / xDist));
       setX = (float)gAccX;
@@ -96,11 +96,22 @@ public class Particle{
       gAccY = gAccY * sin(atan(yDist / xDist));
       setY = (float)gAccY;
       //acc.set(acc.x, gAccY); // Update accelleration
+    }*/
+    if(abs(distance) > radius + otherRadius){
+      if(xDist != 0){
+        gAccX = gAcc * xDirection;
+        gAccX = gAccX * cos(atan(yDist / xDist));
+        setX = (float)gAccX;
+
+        gAccY = gAcc * yDirection;
+        gAccY = gAccY * sin(atan(yDist / xDist));
+        setY = (float)gAccY;
+      }
     }
     acc.set(0, 0);
     acc.set(setX, setY);
     //acc.(setY / setX);
-    if(xDist > radius + otherRadius || yDist > radius + otherRadius){
+    if(abs(distance) > radius + otherRadius){
       v.add(acc.div(60));
     }
     p.add(v); // TODO: x time              // ALL OF THIS PRODUCES GOOD RESULTS WHEN X1 = X2 OR Y1 = Y2 OR X1 = Y2 ETC., BUT NOT WHEN THEY'RE DIFFERENT. WHY? 
