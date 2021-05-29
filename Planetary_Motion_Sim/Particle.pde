@@ -28,7 +28,6 @@ public class Particle{
   public int ID;
   private PVector p, v, acc;
   public float mass, radius;
-  private double gAccX, gAccY;
   
   public PVector pubP, pubV, pubAcc;
   void drawParticle(){
@@ -38,15 +37,26 @@ public class Particle{
     } else {
       stroke(0, 255, 0);
     }
-    strokeWeight(radius * 2);
-    point(stpX(p.x), stpY(p.y)); // IMPORTANT: x values are with centre 0. stp() converts back to Processing format (left side of screen 0)
+    //strokeWeight(radius * 2);
+    translate(stpX(p.x), stpY(p.y)); // IMPORTANT: x values are with centre 0. stp() converts back to Processing format (left side of screen 0)
+    sphere(radius * 2);
+    translate(0 - stpX(p.x), 0 - stpY(p.y));
     
     ////////  CALCULATIONS  \\\\\\\\
-    float distance, otherMass, otherRadius;
-    float otherX, otherY, xDist, yDist;
-    int xDirection, yDirection; // If positive, pulls to the right, if negative, pulls to the left
+    //float distance, otherMass, otherRadius;
+    //float otherX, otherY, xDist, yDist;
+    //int xDirection, yDirection; // If positive, pulls to the right, if negative, pulls to the left
     
     ///  Get other particles properties  ///
+    ArrayList<Float> myDistances = globDistances.get(ID);
+    ArrayList<Float> myXDistances = xDistances.get(ID);
+    ArrayList<Float> myYDistances = yDistances.get(ID);
+    ArrayList<Integer> myXDirections = new ArrayList<Integer>();
+    ArrayList<Integer> myYDirections = new ArrayList<Integer>();
+    ArrayList<Float> gAccX = new ArrayList<Float>();
+    ArrayList<Float> gAccY = new ArrayList<Float>();
+    ArrayList<PVector> allForces = new ArrayList<PVector>();
+    /*
     if(ID == 0){
       otherMass = massB;
       otherX = xPosB;
@@ -64,40 +74,54 @@ public class Particle{
       xDist = xDistance;
       yDist = yDistance;
     }
+    */
     ///  Get direction (-1 = L, 1 = R) to other particle  ///
-    if(p.x > otherX){
-      xDirection = -1;
-    } else if(p.x < otherX){
-      xDirection = 1;
-    } else {
-      xDirection = 0;
+    for(int i = 0; i < xPos.size(); i++){ // Do physics relative to each other particle
+      if(i == ID){
+        continue; // no use doing physics for myself!
+      }
+      float otherX = xPos.get(i);
+      float otherY = yPos.get(i);
+      if(p.x > otherX){
+        myXDirections.add(-1);
+      } else if(p.x < otherX){
+        myXDirections.add(1);
+      } else {
+        myXDirections.add(1);
+      }
+      if(p.y > otherY){
+        myYDirections.add(-1);
+      } else if(p.y < otherY){
+        myYDirections.add(1);
+      } else {
+        myYDirections.add(0);
+      }
+      float gAcc = ((6.6726e-1 * mass * allMass.get(i)) / ((float)globDistances.get(ID).get(i) * (float)globDistances.get(ID).get(i))) / mass;
+      // above code working-ish
+      if(abs((float)globDistances.get(ID).get(i)) > radius + allRadius.get(i)){
+        println(myXDistances);
+        if((float)myXDistances.get(i) != 0){
+          gAccX.add(gAcc * myXDirections.get(0));
+          gAccX.set(gAccX.size() - 1, gAccX.get(gAccX.size() - 1) * cos(atan(myYDistances.get(i) / myXDistances.get(i))));
+  
+          gAccY.add(gAcc * myYDirections.get(0));
+          gAccY.set(gAccX.size() - 1, gAccY.get(gAccX.size() - 1) * sin(atan(myYDistances.get(i) / myXDistances.get(i))));
+        }
+      }
     }
-    if(p.y > otherY){
-      yDirection = -1;
-    } else if(p.y < otherY){
-      yDirection = 1;
-    } else {
-      yDirection = 0;
+    for(int i = 0; i < gAccX.size(); i++){
+      allForces.add(new PVector(gAccX.get(i), gAccY.get(i)));
     }
-    ///  Do physics!  ///
-    double gAcc = ((6.6726e-11 * mass * otherMass) / (distance * distance)) / mass; // Get force between them
+    for(int i = 0; i < allForces.size(); i++){
+      acc.add(allForces.get(i));
+    }
+    v.add(acc.div(60));
+    p.add(v);
+/*
     float setX, setY;
     setX = acc.x;
     setY = acc.y;
-    /*if(abs(xDist) > radius + otherRadius){ // Avoid / by 0
-      gAccX = gAcc * xDirection;
-      gAccX = gAccX * cos(atan(yDist / xDist));
-      setX = (float)gAccX;
-      
-      //acc.set(gAccX, acc.y); // Update accelleration
-    }
-    if(abs(yDist) > radius + otherRadius){
-      gAccY = gAcc * yDirection;
-      gAccY = gAccY * sin(atan(yDist / xDist));
-      setY = (float)gAccY;
-      //acc.set(acc.x, gAccY); // Update accelleration
-    }*/
-    if(abs(distance) > radius + otherRadius){
+    if(abs(distance) > radius + otherRadius){ // All this needs to go in the bracket above at some point (I hope)
       if(xDist != 0){
         gAccX = gAcc * xDirection;
         gAccX = gAccX * cos(atan(yDist / xDist));
@@ -122,7 +146,7 @@ public class Particle{
       stroke(255, 255, 0);
       line(stpX(p.x), stpY(p.y), stpX(p.x + v.x * 100), stpY(p.y + v.y * 100));
       //println(acc.x, acc.y);
-    //}  //<>//
+    //} */ //<>//
   }
   void publishVariables(){
     pubP = p;

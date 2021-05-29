@@ -1,14 +1,50 @@
+import peasy.*; //<>//
+/*
+  Changed in this version:
+    . added changelogs
+    . made G and mass 10^9 times larger/smaller
+    . any number of particles
+  Finished: true
+  Working: true
+*/
 ArrayList<Particle> particles = new ArrayList<Particle>();
-float globDistance, xDistance, yDistance;
-float xPosA, xPosB, yPosA, yPosB;
-float massA, massB, radiusA, radiusB;
+ArrayList<Float> xPos = new ArrayList<Float>();
+ArrayList<Float> yPos = new ArrayList<Float>();
+ArrayList<Float> allMass = new ArrayList<Float>();
+ArrayList<Float> allRadius = new ArrayList<Float>();
+ArrayList<ArrayList> globDistances = new ArrayList<ArrayList>();
+ArrayList<ArrayList> xDistances = new ArrayList<ArrayList>();
+ArrayList<ArrayList> yDistances = new ArrayList<ArrayList>();
+ArrayList[] variables = {xPos, yPos, allMass, allRadius, globDistances, xDistances, yDistances};
+
+//float globDistance, xDistance, yDistance;
+//float xPosA, xPosB, yPosA, yPosB;
+//float massA, massB, radiusA, radiusB;
 boolean isPaused;
 int tick, debugCount;
+
+PeasyCam cam;
+
+void clearVariables(){
+  xPos.clear();
+  yPos.clear();
+  allMass.clear();
+  allRadius.clear();
+  globDistances.clear();
+  xDistances.clear();
+  yDistances.clear();
+}
+
 void setup(){
-  size(1000, 800);
+  size(1000, 800, P3D);
+  PeasyCam cam = new PeasyCam(this, 6000);
+  cam.setMaximumDistance(7000);
+  cam.setMinimumDistance(100);
   background(30);
-  particles.add(new Particle( 100, 0, 0, 0, 5.98e+12, 5));
-  particles.add(new Particle( 0, 170, 0, 0, 5.98e+12, 5));
+  particles.add(new Particle( 50, 50, 0, 0, 5.98e+3, 5));
+  particles.add(new Particle( -50, -50, 0, 0, 5.98e+3, 5));
+  particles.add(new Particle( 50, -50, 0, 0, 5.98e+3, 5));
+  particles.add(new Particle( -50, 50, 0, 0, 5.98e+3, 5));
   for(int i = 0; i < particles.size(); i++){
     particles.get(i).setID(i);
   }
@@ -19,20 +55,37 @@ void setup(){
 }
 
 void draw(){
+  pointLight(255, 255, 255, 0, 0, 0);
+  ambientLight(200, 200, 200);
   if((! isPaused) || (debugCount > 1)){
-    background(30);
-    xPosA = particles.get(0).pubP.x;
-    xPosB = particles.get(1).pubP.x;
-    yPosA = particles.get(0).pubP.y;
-    yPosB = particles.get(1).pubP.y;
-    massA = particles.get(0).mass;
-    massB = particles.get(1).mass;
-    radiusA = particles.get(0).radius;
-    radiusB = particles.get(1).radius;
-    
-    globDistance = sqrt(pow(abs(xPosA - xPosB), 2) + pow(abs(yPosA - yPosB), 2));
-    xDistance = abs(xPosA - xPosB);
-    yDistance = abs(yPosA - yPosB);
+    background(30); //<>//
+    clearVariables();
+    for(int i = 0; i < particles.size(); i++){ //<>//
+      xPos.add(particles.get(i).pubP.x);
+      yPos.add(particles.get(i).pubP.y);
+      allMass.add(particles.get(i).mass);
+      allRadius.add(particles.get(i).radius);
+    }
+    for(int i = 0; i < xPos.size(); i++){
+      ArrayList<Float> distances = new ArrayList<Float>();
+      ArrayList<Float> x = new ArrayList<Float>();
+      ArrayList<Float> y = new ArrayList<Float>();
+      for(int j = 0; j < xPos.size(); j++){
+        if(i == j){
+          distances.add(0.0);
+          x.add(0.0);
+          y.add(0.0);
+          continue;
+        }
+        distances.add( sqrt(pow(abs(xPos.get(i) - xPos.get(j)), 2) + pow(abs(yPos.get(i) - yPos.get(j)), 2)) ); // pythag
+        
+        x.add(abs(xPos.get(i) - xPos.get(j)));
+        y.add(abs(yPos.get(i) - yPos.get(j)));
+      }
+      globDistances.add(distances);
+      xDistances.add(x);
+      yDistances.add(y);
+    }
     
     for(Particle particle : particles){
       particle.drawParticle();
@@ -89,7 +142,7 @@ void draw(){
       frameRate(60);
     }
     if(key == 'd'){
-      println("Debug"); //<>//
+      println("Debug");
     }
     key = '%'; // Random charector to prevent wrong key detection
   }
@@ -100,9 +153,9 @@ String[] debug(){
   result[1] = "   ** GLOBAL   **";
   result[2] = "ITERATION";
   result[3] = str(tick);
-  result[4] = "DISTANCE";
-  result[5] = str(globDistance);
-  result[6] = str(xDistance) + ", " + str(yDistance);
+  result[4] = "";//"DISTANCE";
+  result[5] = "";//str(globDistance);
+  result[6] = "";//str(xDistance) + ", " + str(yDistance);
   
   result[7] = "   ** OBJECT 1 **";
   result[8] = "POSITION";
