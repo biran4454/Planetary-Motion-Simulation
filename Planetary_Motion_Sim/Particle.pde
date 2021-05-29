@@ -8,23 +8,7 @@ public class Particle{
     pubAcc = acc;
     this.mass = mass;
     this.radius = radius;
-  }/*
-  Particle(int x, int y, float mass, float radius){
-    p = new PVector(x, y);
-    v = new PVector(0, 0);
-    a = new PVector(0, 0);
-    this.mass = mass;
-    this.radius = radius;
-    gAcc = ((6.6726e-11) * mass) / (radius * radius);
   }
-  Particle(int x, int y){
-    p = new PVector(x, y);
-    v = new PVector(0, 0);
-    a = new PVector(0, 0);
-    mass = 100;
-    radius = 10;
-    gAcc = ((6.6726e-11) * mass) / (radius * radius);
-  }*/
   public int ID;
   private PVector p, v, acc;
   public float mass, radius;
@@ -32,11 +16,7 @@ public class Particle{
   public PVector pubP, pubV, pubAcc;
   void drawParticle(){
     ////////  DRAWING  \\\\\\\\
-    if(ID == 0){ // Gives them different colours
-      stroke(255, 0, 0);
-    } else {
-      stroke(0, 255, 0);
-    }
+    stroke(min(ID * 50, 255), min(255 - ID * 50, 255), 0); 
     //strokeWeight(radius * 2);
     translate(stpX(p.x), stpY(p.y)); // IMPORTANT: x values are with centre 0. stp() converts back to Processing format (left side of screen 0)
     sphere(radius * 2);
@@ -99,7 +79,6 @@ public class Particle{
       float gAcc = ((6.6726e-1 * mass * allMass.get(i)) / ((float)globDistances.get(ID).get(i) * (float)globDistances.get(ID).get(i))) / mass;
       // above code working-ish
       if(abs((float)globDistances.get(ID).get(i)) > radius + allRadius.get(i)){
-        println(myXDistances);
         if((float)myXDistances.get(i) != 0){
           gAccX.add(gAcc * myXDirections.get(0));
           gAccX.set(gAccX.size() - 1, gAccX.get(gAccX.size() - 1) * cos(atan(myYDistances.get(i) / myXDistances.get(i))));

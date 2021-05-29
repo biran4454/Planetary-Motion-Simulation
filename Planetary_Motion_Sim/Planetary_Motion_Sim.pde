@@ -1,9 +1,14 @@
-import peasy.*; //<>//
+// VERSION COMPLETED - DO NOT EDIT //<>//
+import peasy.*;
 /*
   Changed in this version:
     . added changelogs
     . made G and mass 10^9 times larger/smaller
     . any number of particles
+    . removed debug info
+    . removed unnecessary commented out code
+    . added more particles
+    . all info stored in ArrayLists
   Finished: true
   Working: true
 */
@@ -16,10 +21,6 @@ ArrayList<ArrayList> globDistances = new ArrayList<ArrayList>();
 ArrayList<ArrayList> xDistances = new ArrayList<ArrayList>();
 ArrayList<ArrayList> yDistances = new ArrayList<ArrayList>();
 ArrayList[] variables = {xPos, yPos, allMass, allRadius, globDistances, xDistances, yDistances};
-
-//float globDistance, xDistance, yDistance;
-//float xPosA, xPosB, yPosA, yPosB;
-//float massA, massB, radiusA, radiusB;
 boolean isPaused;
 int tick, debugCount;
 
@@ -41,10 +42,10 @@ void setup(){
   cam.setMaximumDistance(7000);
   cam.setMinimumDistance(100);
   background(30);
-  particles.add(new Particle( 50, 50, 0, 0, 5.98e+3, 5));
-  particles.add(new Particle( -50, -50, 0, 0, 5.98e+3, 5));
-  particles.add(new Particle( 50, -50, 0, 0, 5.98e+3, 5));
-  particles.add(new Particle( -50, 50, 0, 0, 5.98e+3, 5));
+  particles.add(new Particle( 50, -50, 0, 0, 5.98e+3, 5));  // Try swapping the order of these for cool different effects,
+  particles.add(new Particle( -50, -50, 0, 0, 5.98e+3, 5)); // although that's not what's meant to happen because the
+  particles.add(new Particle( 50, 50, 0, 0, 5.98e+3, 5));   // location is updated before all physics calculations
+  particles.add(new Particle( -50, 50, 0, 0, 5.98e+3, 5));  // have completed.
   for(int i = 0; i < particles.size(); i++){
     particles.get(i).setID(i);
   }
@@ -58,6 +59,10 @@ void draw(){
   pointLight(255, 255, 255, 0, 0, 0);
   ambientLight(200, 200, 200);
   if((! isPaused) || (debugCount > 1)){
+    println("---");
+    /*if(tick % 20 == 0){ // Uncomment to generate a particle each second. Notice that the effect differs depending on the initial vx and vy, making Newton very angry.
+      particles.add(new Particle( 50, 50, 1, 0, 5.98e+3, 5));
+    }*/
     background(30); //<>//
     clearVariables();
     for(int i = 0; i < particles.size(); i++){ //<>//
@@ -86,7 +91,8 @@ void draw(){
       xDistances.add(x);
       yDistances.add(y);
     }
-    
+    println(xPos);
+    println(yPos);
     for(Particle particle : particles){
       particle.drawParticle();
     }
@@ -103,12 +109,6 @@ void draw(){
       debugCount = 0;
       delay(100);
     }
-    String[] debugData = debug();
-    for(int i = 0; i < debugData.length - 1; i++){
-      println(debugData[i]);
-    }
-    println("******** END OF DEBUG INFO ********");
-    println("");
     println("Press 'a' to continue once");
     println("Press 's' to continue five frames");
     println("Press 'w' to continue 20 frames");
@@ -146,31 +146,4 @@ void draw(){
     }
     key = '%'; // Random charector to prevent wrong key detection
   }
-}
-String[] debug(){
-  String[] result = new String[21];
-  result[0] = "********* DEBUG INFO ***********";
-  result[1] = "   ** GLOBAL   **";
-  result[2] = "ITERATION";
-  result[3] = str(tick);
-  result[4] = "";//"DISTANCE";
-  result[5] = "";//str(globDistance);
-  result[6] = "";//str(xDistance) + ", " + str(yDistance);
-  
-  result[7] = "   ** OBJECT 1 **";
-  result[8] = "POSITION";
-  result[9] = str(particles.get(0).pubP.x) + ", " + str(particles.get(0).pubP.y);
-  result[10] = "VELOCITY";
-  result[11] = str(particles.get(0).pubV.x) + ", " + str(particles.get(0).pubV.y);
-  result[12] = "GRAVITY";
-  result[13] = str(particles.get(0).pubAcc.x) + ", " + str(particles.get(0).pubAcc.y);
-  
-  result[14] = "   ** OBJECT 2 **";
-  result[15] = "POSITION";
-  result[16] = str(particles.get(1).pubP.x) + ", " + str(particles.get(1).pubP.y);
-  result[17] = "VELOCITY";
-  result[18] = str(particles.get(1).pubV.x) + ", " + str(particles.get(1).pubV.y);
-  result[19] = "GRAVITY";
-  result[20] = str(particles.get(1).pubAcc.x) + ", " + str(particles.get(1).pubAcc.y);
-  return(result);
 }
